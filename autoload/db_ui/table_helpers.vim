@@ -58,42 +58,18 @@ let s:oracle_key_cmd = "
       \AND " . s:oracle_qualify_and_order_by . "L.column_name"
 
 let s:oracle = {
-      \ 'Columns': 'DESCRIBE "{schema}"."{table}"',
-      \ 'Foreign Keys': printf(s:oracle_key_cmd, 'R'),
-      \ 'Indexes': "
-            \SELECT DISTINCT\n\t
-            \N.owner,\n\t
-            \N.index_name,\n\t
-            \N.constraint_type\n
-            \" . s:oracle_from . "\n
-            \WHERE\n\t
-            \" . s:oracle_qualify_and_order_by . "N.index_name",
       \ 'List': 'SELECT * FROM "{schema}"."{table}"',
-      \ 'Primary Keys': printf(s:oracle_key_cmd, 'P'),
-      \ 'References': "
-            \SELECT\n\t
-            \RFRING.owner,\n\t
-            \RFRING.table_name,\n\t
-            \RFRING.column_name\n
-            \FROM all_cons_columns RFRING\n
-            \JOIN all_constraints N\n\t
-            \ON RFRING.constraint_name = N.constraint_name\n
-            \JOIN all_cons_columns RFRD\n\t
-            \ON N.r_constraint_name = RFRD.constraint_name\n
-            \JOIN all_users U\n\t
-            \ON N.owner = U.username\n
-            \WHERE\n\t
-            \N.constraint_type = 'R'\n
-            \AND\n\t
-            \U.common = 'NO'\n
-            \AND\n\t
-            \RFRD.owner = '{schema}'\n
-            \AND\n\t
-            \RFRD.table_name = '{table}'\n
-            \ORDER BY\n\t
-            \RFRING.owner,\n\t
-            \RFRING.table_name,\n\t
-            \RFRING.column_name",
+      \ 'DDL Table': "
+            \SELECT DBMS_LOB.SUBSTR(X.ddl, 4000, (LEVEL - 1) * 4000 + 1) AS ddl
+            \ FROM (SELECT DBMS_METADATA.GET_DDL('TABLE', '{table}', '{schema}') AS ddl FROM dual) X
+            \ CONNECT BY DBMS_LOB.SUBSTR(X.ddl, 4000, (LEVEL - 1) * 4000 + 1) IS NOT NULL",
+      \ 'DDL Procedure': "
+            \SELECT REPLACE(text, '\"', '') AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type IN ('PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY') ORDER BY line",
+      \ 'DDL Function': "
+            \SELECT REPLACE(text, '\"', '') AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type = 'FUNCTION' ORDER BY line",
+      \ 'DDL Package': "
+            \SELECT REPLACE(text, '\"', '') AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type IN ('PACKAGE', 'PACKAGE BODY') ORDER BY line",
+      \ 'Columns': 'DESCRIBE "{schema}"."{table}"',
       \ }
 
 for [helper, query] in items(s:oracle)

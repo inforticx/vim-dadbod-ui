@@ -148,6 +148,10 @@ function! s:get_oracle_queries()
       \ FROM all_tables
       \ UNION SELECT owner, view_name AS \"table_name\"
       \ FROM all_views
+      \ UNION SELECT O.owner, O.object_name AS \"table_name\"
+      \ FROM all_objects O
+      \ WHERE O.owner = 'EULER_ADMIN'
+      \   AND O.object_type IN ('PROCEDURE', 'FUNCTION', 'PACKAGE')
       \ ) T
       \ JOIN all_users U ON T.owner = U.username
       \ WHERE 1 = 1

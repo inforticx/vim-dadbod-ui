@@ -1,0 +1,11 @@
+SET linesize 4000;
+SET pagesize 4000;
+
+COLUMN column_name FORMAT a20;
+COLUMN constraint_type FORMAT a20;
+COLUMN index_name FORMAT a20;
+COLUMN owner FORMAT a20;
+COLUMN table_name FORMAT a20;
+
+SELECT REPLACE(text, '"', '') AS text FROM all_source WHERE owner = 'EULER_ADMIN' AND name = 'SP_UPDATE_VECTORS' AND type = 'PROCEDURE' ORDER BY line
+;
