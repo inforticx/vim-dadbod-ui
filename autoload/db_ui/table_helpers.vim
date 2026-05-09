@@ -64,11 +64,11 @@ let s:oracle = {
             \ FROM (SELECT DBMS_METADATA.GET_DDL('TABLE', '{table}', '{schema}') AS ddl FROM dual) X
             \ CONNECT BY DBMS_LOB.SUBSTR(X.ddl, 4000, (LEVEL - 1) * 4000 + 1) IS NOT NULL",
       \ 'DDL Procedure': "
-            \SELECT REPLACE(text, '\"', '') AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type IN ('PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY') ORDER BY line",
+            \SELECT RTRIM(REPLACE(text, '\"', ''), CHR(10) || CHR(13)) AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type IN ('PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY') ORDER BY line",
       \ 'DDL Function': "
-            \SELECT REPLACE(text, '\"', '') AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type = 'FUNCTION' ORDER BY line",
+            \SELECT RTRIM(REPLACE(text, '\"', ''), CHR(10) || CHR(13)) AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type = 'FUNCTION' ORDER BY line",
       \ 'DDL Package': "
-            \SELECT REPLACE(text, '\"', '') AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type IN ('PACKAGE', 'PACKAGE BODY') ORDER BY line",
+            \SELECT RTRIM(REPLACE(text, '\"', ''), CHR(10) || CHR(13)) AS text FROM all_source WHERE owner = UPPER('{schema}') AND name = UPPER('{table}') AND type IN ('PACKAGE', 'PACKAGE BODY') ORDER BY line",
       \ 'Columns': 'DESCRIBE "{schema}"."{table}"',
       \ }
 
